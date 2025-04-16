@@ -1,0 +1,78 @@
+// @version=5
+indicator("VOLT - EMA Crossover + Filters", overlay=true)
+
+// === Input Parameters ===
+fast = input.int(8, "EMA Fast")
+slow = input.int(34, "EMA Slow")
+trendLen = input.int(200, "Macro Trend EMA")
+atrLen = input.int(14, "ATR Length")
+slMult = input.float(1.5, "SL Multiplier")
+tpMult = input.float(2.0, "TP Multiplier")
+useTrailing = input.bool(true, "Use Trailing Stop")
+trailRatio = input.float(0.2, "Trailing Stop Ratio", step=0.05)
+usePartialTP = input.bool(true, "Partial TP (2x/3x)")
+useMACD = input.bool(true, "Use MACD Confirm")
+useRSI = input.bool(true, "Use RSI Filter")
+rsiMin = input.int(40, "RSI Min")
+rsiMax = input.int(60, "RSI Max")
+
+// === Indicators ===
+emaFast = ta.ema(close, fast)
+emaSlow = ta.ema(close, slow)
+trend = ta.ema(close, trendLen)
+atr = ta.atr(atrLen)
+macdLine = ta.ema(close, 12) - ta.ema(close, 26)
+signalLine = ta.ema(macdLine, 9)
+rsi = ta.rsi(close, 14)
+
+// === Signal Conditions ===
+crossLong = ta.crossover(emaFast, emaSlow)
+crossShort = ta.crossunder(emaFast, emaSlow)
+aboveTrend = close > trend
+belowTrend = close < trend
+macdLong = macdLine > signalLine
+macdShort = macdLine < signalLine
+rsiGood = rsi >= rsiMin and rsi <= rsiMax
+
+longEntry = crossLong and aboveTrend and (not useMACD or macdLong) and (not useRSI or rsiGood)
+shortEntry = crossShort and belowTrend and (not useMACD or macdShort) and (not useRSI or rsiGood)
+
+// === State Tracking for Trailing and TP ===
+var float long_trail = na
+var float short_trail = na
+
+if (longEntry)
+    entry = close
+    sl = entry - atr * slMult
+    tp1 = entry + atr * 2.0
+    tp2 = entry + atr * 3.0
+    long_trail := entry
+    label.new(bar_index, low, "LONG\nEntry: " + str.tostring(entry) + "\nSL: " + str.tostring(sl) + "\nTP1: " + str.tostring(tp1) + "\nTP2: " + str.tostring(tp2), style=label.style_label_up, color=color.green, textcolor=color.white)
+
+if (shortEntry)
+    entry = close
+    sl = entry + atr * slMult
+    tp1 = entry - atr * 2.0
+    tp2 = entry - atr * 3.0
+    short_trail := entry
+    label.new(bar_index, high, "SHORT\nEntry: " + str.tostring(entry) + "\nSL: " + str.tostring(sl) + "\nTP1: " + str.tostring(tp1) + "\nTP2: " + str.tostring(tp2), style=label.style_label_down, color=color.red, textcolor=color.white)
+
+// === Trailing Stop Lines
+if useTrailing and not na(long_trail)
+    long_trail := math.max(long_trail, high)
+    trailSL = long_trail - (long_trail - close) * trailRatio
+    line.new(bar_index - 1, trailSL, bar_index, trailSL, color=color.yellow, width=1)
+
+if useTrailing and not na(short_trail)
+    short_trail := math.min(short_trail, low)
+    trailSL = short_trail + (close - short_trail) * trailRatio
+    line.new(bar_index - 1, trailSL, bar_index, trailSL, color=color.orange, width=1)
+
+// === Entry Markers ===
+plotshape(longEntry, title="Long Signal", location=location.belowbar, color=color.green, style=shape.triangleup, size=size.small)
+plotshape(shortEntry, title="Short Signal", location=location.abovebar, color=color.red, style=shape.triangledown, size=size.small)
+
+// === Trend / Filter Visuals ===
+plot(emaFast, color=color.orange, title="EMA Fast")
+plot(emaSlow, color=color.blue, title="EMA Slow")
+plot(trend, color=color.gray, title="Macro Trend EMA")
