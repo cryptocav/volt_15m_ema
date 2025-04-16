@@ -30,7 +30,7 @@ Most retail strategies are too noisy, curve-fitted, or naive. VOLT is built on a
 
 I’m sharing these outputs publicly to contribute to more grounded, data-driven trading system exploration — and to track what actually works.
 
-This repo is part of my personal learning and exploration. The full engine (strategy logic, parameter sweeper, and backtester) is still under development and not yet open-sourced.
+This repo is part of my personal learning and exploration. The full engine (strategy logic, parameter sweeper, and backtester) is still under development.
 
 ## 📈 Example Result
 
