@@ -36,6 +36,8 @@ macdBlockedShort = useMACD and (macdLine >= signalLine)
 
 longEntry = crossLong and aboveTrend and not rsiBlocked and not macdBlockedLong
 shortEntry = crossShort and belowTrend and not rsiBlocked and not macdBlockedShort
+longFiltered = crossLong and aboveTrend and not longEntry
+shortFiltered = crossShort and belowTrend and not shortEntry
 
 // === Trade Labels & TP Logic
 var float long_trail = na
@@ -61,6 +63,8 @@ if useTrailing and not na(short_trail)
 // === Entry Markers
 plotshape(longEntry, title="Long Signal", location=location.belowbar, color=color.green, style=shape.triangleup, size=size.small)
 plotshape(shortEntry, title="Short Signal", location=location.abovebar, color=color.red, style=shape.triangledown, size=size.small)
+plotshape(longFiltered, title="Filtered Long", location=location.belowbar, color=color.yellow, style=shape.triangleup, size=size.tiny)
+plotshape(shortFiltered, title="Filtered Short", location=location.abovebar, color=color.orange, style=shape.triangledown, size=size.tiny)
 
 // === Trend & Visuals
 plot(emaFast, title="EMA Fast", color=color.orange)
@@ -68,4 +72,4 @@ plot(emaSlow, title="EMA Slow", color=color.blue)
 plot(trend, title="Macro Trend EMA", color=color.gray)
 
 // === ALERT CONDITION (Monitor-Matching)
-alertcondition(longEntry or shortEntry, title="🔔 Confirmed VOLT Signal", message="VOLT Confirmed Entry on {{ticker}} ({{interval}})")
+alertcondition(longEntry or shortEntry, title="🔔 Confirmed VOLT Signal", message="VOLT Confirmed Entry on {ticker} ({interval})")
