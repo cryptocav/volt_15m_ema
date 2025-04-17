@@ -71,6 +71,7 @@ The full architecture is still evolving and will be shared once hardened. I’m 
 ## 🧠 Connect
 
 I'm sharing this as part of a longer-term vision to build open, grounded trading tools.
+
 📱 **Live Signals**: [t.me/volt\_signals](https://t.me/volt_signals)  
 
 
