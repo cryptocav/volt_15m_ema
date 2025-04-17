@@ -2,6 +2,9 @@
 
 This repository contains selected outputs from my custom-built strategy engine, VOLT — a system designed to discover real, executable crypto strategies that beat *buy and hold* using logic inspired by institutional trading flows.
 
+📱 **Live Signals**: [t.me/volt\_signals](https://t.me/volt_signals)  
+🧠 Questions: [@cavpatrol](https://twitter.com/cavpatrol)
+
 ## 📌 What This Repo Contains
 
 - `volt_ema_crossover_indicator.pine`:  
@@ -68,6 +71,9 @@ The full architecture is still evolving and will be shared once hardened. I’m 
 ## 🧠 Connect
 
 I'm sharing this as part of a longer-term vision to build open, grounded trading tools.
+
+📱 **Live Signals**: [t.me/volt\_signals](https://t.me/volt_signals)  
+🧠 Questions: [@cavpatrol](https://twitter.com/cavpatrol)
 
 > All signal. No hype.
 
