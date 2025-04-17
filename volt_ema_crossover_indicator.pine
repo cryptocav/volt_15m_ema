@@ -25,54 +25,47 @@ macdLine = ta.ema(close, 12) - ta.ema(close, 26)
 signalLine = ta.ema(macdLine, 9)
 rsi = ta.rsi(close, 14)
 
-// === Signal Conditions ===
+// === Entry Logic
 crossLong = ta.crossover(emaFast, emaSlow)
 crossShort = ta.crossunder(emaFast, emaSlow)
 aboveTrend = close > trend
 belowTrend = close < trend
-macdLong = macdLine > signalLine
-macdShort = macdLine < signalLine
-rsiGood = rsi >= rsiMin and rsi <= rsiMax
+rsiBlocked = useRSI and (rsi >= rsiMin and rsi <= rsiMax)
+macdBlockedLong = useMACD and (macdLine <= signalLine)
+macdBlockedShort = useMACD and (macdLine >= signalLine)
 
-longEntry = crossLong and aboveTrend and (not useMACD or macdLong) and (not useRSI or rsiGood)
-shortEntry = crossShort and belowTrend and (not useMACD or macdShort) and (not useRSI or rsiGood)
+longEntry = crossLong and aboveTrend and not rsiBlocked and not macdBlockedLong
+shortEntry = crossShort and belowTrend and not rsiBlocked and not macdBlockedShort
 
-// === State Tracking for Trailing and TP ===
+// === Trade Labels & TP Logic
 var float long_trail = na
 var float short_trail = na
 
 if (longEntry)
-    entry = close
-    sl = entry - atr * slMult
-    tp1 = entry + atr * 2.0
-    tp2 = entry + atr * 3.0
-    long_trail := entry
+    entry = close, sl = entry - atr * slMult, tp1 = entry + atr * 2.0, tp2 = entry + atr * 3.0, long_trail := entry
     label.new(bar_index, low, "LONG\nEntry: " + str.tostring(entry) + "\nSL: " + str.tostring(sl) + "\nTP1: " + str.tostring(tp1) + "\nTP2: " + str.tostring(tp2), style=label.style_label_up, color=color.green, textcolor=color.white)
 
 if (shortEntry)
-    entry = close
-    sl = entry + atr * slMult
-    tp1 = entry - atr * 2.0
-    tp2 = entry - atr * 3.0
-    short_trail := entry
+    entry = close, sl = entry + atr * slMult, tp1 = entry - atr * 2.0, tp2 = entry - atr * 3.0, short_trail := entry
     label.new(bar_index, high, "SHORT\nEntry: " + str.tostring(entry) + "\nSL: " + str.tostring(sl) + "\nTP1: " + str.tostring(tp1) + "\nTP2: " + str.tostring(tp2), style=label.style_label_down, color=color.red, textcolor=color.white)
 
-// === Trailing Stop Lines
+// === Trailing Stop Logic
 if useTrailing and not na(long_trail)
-    long_trail := math.max(long_trail, high)
-    trailSL = long_trail - (long_trail - close) * trailRatio
+    long_trail := math.max(long_trail, high), trailSL = long_trail - (long_trail - close) * trailRatio
     line.new(bar_index - 1, trailSL, bar_index, trailSL, color=color.yellow, width=1)
 
 if useTrailing and not na(short_trail)
-    short_trail := math.min(short_trail, low)
-    trailSL = short_trail + (close - short_trail) * trailRatio
+    short_trail := math.min(short_trail, low), trailSL = short_trail + (close - short_trail) * trailRatio
     line.new(bar_index - 1, trailSL, bar_index, trailSL, color=color.orange, width=1)
 
-// === Entry Markers ===
+// === Entry Markers
 plotshape(longEntry, title="Long Signal", location=location.belowbar, color=color.green, style=shape.triangleup, size=size.small)
 plotshape(shortEntry, title="Short Signal", location=location.abovebar, color=color.red, style=shape.triangledown, size=size.small)
 
-// === Trend / Filter Visuals ===
-plot(emaFast, color=color.orange, title="EMA Fast")
-plot(emaSlow, color=color.blue, title="EMA Slow")
-plot(trend, color=color.gray, title="Macro Trend EMA")
+// === Trend & Visuals
+plot(emaFast, title="EMA Fast", color=color.orange)
+plot(emaSlow, title="EMA Slow", color=color.blue)
+plot(trend, title="Macro Trend EMA", color=color.gray)
+
+// === ALERT CONDITION (Monitor-Matching)
+alertcondition(longEntry or shortEntry, title="🔔 Confirmed VOLT Signal", message="VOLT Confirmed Entry on {{ticker}} ({{interval}})")
